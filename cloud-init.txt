@@ -1,0 +1,29 @@
+#cloud-config
+package_update: true
+bootcmd:
+- [ cloud-init-per, once, --, mkdir, -m, "0755", -p, /etc/samba ]
+write_files:
+- owner: root:root
+  path: /etc/samba/smb.conf
+  permissions: '0644'
+  content: |-
+    [global]
+    workgroup = UBUSHARE
+    server string = Samba Server %v
+    netbios name = ubuntusrv
+    security = user
+    map to guest = bad user
+    dns proxy = no
+    #============================ Share Definitions ============================== 
+    [share]
+    path = /srv/
+    browsable =yes
+    writable = no
+    guest ok = yes
+    read only = yes
+
+runcmd:
+  - wget -P /srv https://releases.ubuntu.com/noble/ubuntu-24.04.2-live-server-amd64.iso
+  - apt-get update
+  - apt install -y samba
+  - chown -R nobody:nobody /srv
